@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /node_modules/
+Disallow: /work/
+Disallow: /outputs/
+
+Sitemap: https://cloudsysllc.com/sitemap.xml

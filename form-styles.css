@@ -1,0 +1,18 @@
+.honeypot { position: absolute !important; left: -9999px !important; opacity: 0 !important; }
+.form-status { grid-column: span 2; min-height: 1.4em; margin: 0; color: var(--cyan-dark); font-size: 12px; font-weight: 700; line-height: 1.45; }
+.lead-form button[type="submit"]:disabled { cursor: wait; opacity: .7; }
+.cf-turnstile { grid-column: span 2; width: 100%; min-height: 65px; overflow: hidden; }
+.cf-turnstile iframe { max-width: 100%; }
+.message-field { grid-column: span 2; }
+.lead-form textarea { display: block; width: 100%; min-height: 86px; resize: vertical; border: 0; border-bottom: 1px solid var(--line); outline: 0; padding: 12px 0 9px; margin-top: 3px; font: 13px/1.5 Manrope, Arial, sans-serif; background: transparent; }
+.lead-form textarea:focus { border-color: var(--cyan-dark); }
+
+@media (max-width: 800px) {
+  .cta { padding-left: 4vw; padding-right: 4vw; }
+  .lead-form { padding: 18px; }
+}
+
+@media (max-width: 360px) {
+  .lead-form { padding: 14px; }
+  .cf-turnstile { min-height: 140px; }
+}
