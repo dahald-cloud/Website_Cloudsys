@@ -2,4 +2,5 @@
 deployment:
   tasks:
     - export DEPLOYPATH=/home/ct8qyx7l8yco/public_html/
-    - /bin/rsync -av --exclude='.git/' --exclude='.gitignore' --exclude='.cpanel.yml' --exclude='.DS_Store' --exclude='.env' --exclude='.env.*' --exclude='cloudsys-config.php' --exclude='README.md' --exclude='deployment/' --exclude='work/' --exclude='outputs/' --exclude='package.json' --exclude='package-lock.json' --exclude='server.js' --exclude='server.test.js' ./ "$DEPLOYPATH"
+    - /bin/rsync -rltv --exclude='.git/' --exclude='.gitignore' --exclude='.cpanel.yml' --exclude='.DS_Store' --exclude='.env' --exclude='.env.*' --exclude='cloudsys-config.php' --exclude='README.md' --exclude='deployment/' --exclude='work/' --exclude='outputs/' --exclude='package.json' --exclude='package-lock.json' --exclude='server.js' --exclude='server.test.js' ./ "$DEPLOYPATH"
+    - /bin/chmod 755 "$DEPLOYPATH"
