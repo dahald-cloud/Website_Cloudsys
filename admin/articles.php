@@ -20,8 +20,10 @@ try {
 <!doctype html><html lang="en"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Articles | CloudSys admin</title><meta name="robots" content="noindex, nofollow">
-<link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/admin-styles.css">
-<link rel="stylesheet" href="/article-admin.css">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=20260906-2"><link rel="stylesheet" href="/admin-styles.css?v=20260906-2">
+<link rel="stylesheet" href="/article-admin.css?v=20260906-2">
 </head><body class="admin-dashboard-shell"><header class="admin-header"><a class="brand" href="/admin/" aria-label="CloudSys website controls"><img src="/assets/cloudsys-logo.png" width="794" height="243" alt="CloudSys"></a><nav class="admin-context-nav" aria-label="Administrator navigation"><a href="/admin/">Website controls</a><a href="/admin/articles.php" aria-current="page">Articles</a></nav><div class="admin-account"><a href="/change-password">Change password</a><span><?= cloudsys_article_escape($admin['display_name']) ?></span><form method="post" action="/logout.php"><input type="hidden" name="csrf" value="<?= cloudsys_article_escape(cloudsys_csrf_token()) ?>"><button>Sign out</button></form></div></header>
 <main class="admin-dashboard article-workspace"><p class="admin-eyebrow">ARTICLES</p><h1>Your articles</h1>
 <p>Total: <?= (int) $counts['total'] ?> · Drafts: <?= (int) $counts['drafts'] ?> · Public: <?= (int) $counts['published'] ?></p>
