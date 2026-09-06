@@ -15,7 +15,10 @@ document.querySelectorAll('.editor-toolbar button').forEach((button) => {
     const start = bodyField.selectionStart, end = bodyField.selectionEnd;
     const selection = bodyField.value.slice(start, end) || 'Your text';
     let text;
-    if (button.hasAttribute('data-link')) text = `[${selection}](https://example.com)`;
+    if (button.hasAttribute('data-paragraph')) {
+      const paragraph = selection.split('\n').map((line) => line.replace(/^(?:#{1,6}|[-*]|\d+\.)\s+/, '').trim()).filter(Boolean).join(' ');
+      text = (start > 0 && !bodyField.value.slice(0, start).endsWith('\n\n') ? '\n\n' : '') + paragraph + (!bodyField.value.slice(end).startsWith('\n\n') ? '\n\n' : '');
+    } else if (button.hasAttribute('data-link')) text = `[${selection}](https://example.com)`;
     else if (button.dataset.wrap) text = button.dataset.wrap + selection + button.dataset.wrap;
     else text = (start > 0 && bodyField.value[start - 1] !== '\n' ? '\n' : '') + selection.split('\n').map((line) => button.dataset.prefix + line).join('\n') + '\n';
     bodyField.setRangeText(text, start, end, 'select'); bodyField.focus(); dirty = true;
