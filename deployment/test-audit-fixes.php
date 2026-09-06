@@ -44,6 +44,8 @@ preg_match('/<FilesMatch "([^"]+)"/', $rules, $rule);
 foreach (['cloudsys-config.php', 'cloudsys-config.php.bak', '.env', '.env.production'] as $name) {
     audit_check(preg_match('~' . $rule[1] . '~', $name) === 1, 'Private configuration not denied: ' . $name);
 }
+audit_check(str_contains($rules, 'RedirectMatch 404 ^/includes'), 'Internal PHP include directory is not denied.');
+audit_check(str_contains($rules, '^\.user\.ini$'), 'PHP production settings file is not denied.');
 audit_check(!is_file(dirname(__DIR__) . '/cloudsys-config.php'), 'Private config remains in public folder.');
 echo "Semantic chat routing, shared preview, and private config checks passed.\n";
 

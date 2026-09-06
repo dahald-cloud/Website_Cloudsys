@@ -4,3 +4,5 @@ deployment:
     - export DEPLOYPATH=/home/ct8qyx7l8yco/public_html/
     - /bin/rsync -rltv --exclude='.git/' --exclude='.gitignore' --exclude='.cpanel.yml' --exclude='.DS_Store' --exclude='.env' --exclude='.env.*' --exclude='cloudsys-config.php' --exclude='README.md' --exclude='deployment/' --exclude='work/' --exclude='outputs/' --exclude='package.json' --exclude='package-lock.json' --exclude='server.js' --exclude='server.test.js' ./ "$DEPLOYPATH"
     - /bin/chmod 755 "$DEPLOYPATH"
+    - /usr/bin/find "$DEPLOYPATH" -type d -exec /bin/chmod 755 {} +
+    - /usr/bin/find "$DEPLOYPATH" -type f -exec /bin/chmod 644 {} +
