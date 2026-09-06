@@ -30,6 +30,9 @@ foreach (['What is ERP?', 'How do saved searches work?', 'Give me a NetSuite tip
 }
 audit_check(cloudsys_chat_handoff_followup('Yes please!', true), 'Handoff continuation lost.');
 audit_check(!cloudsys_chat_handoff_followup('Yes please!', false), 'Handoff invented.');
+audit_check(cloudsys_chat_in_scope("what's a sales order?", false), 'Sales-order question rejected as out of scope.');
+audit_check(cloudsys_chat_in_scope('how do you use it?', true), 'Contextual ERP follow-up rejected.');
+audit_check(!cloudsys_chat_in_scope('write me a holiday poem', false), 'Unrelated topic accepted as in scope.');
 
 $fixture = ['id' => 1, 'slug' => 'preview', 'title' => '<script>Preview</script>', 'summary' => 'Summary', 'body_text' => "## Heading\n\nBody", 'author_name' => 'CloudSys', 'published_at' => null, 'category_slug' => 'netsuite', 'category_name' => 'NetSuite', 'cover_image_path' => null];
 ob_start(); cloudsys_render_insights_article($fixture); $rendered = ob_get_clean();

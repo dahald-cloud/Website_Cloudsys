@@ -144,14 +144,10 @@ try {
 
     $currentScope = ' ' . strtolower($message) . ' ';
     $handoffTerms = ['our company', 'my company', 'our account', 'my account', 'our netsuite', 'my netsuite', 'our instance', 'my instance', 'our data', 'my data', 'our setup', 'my setup', 'quote', 'pricing', 'proposal', 'credentials', 'login', 'password', 'customer record', 'specific implementation', 'what should i do', 'what do i do', 'how can you help us', 'how can you help me', 'can you help us', 'can you help me', 'need support', 'get support', 'contact your team', 'talk to someone', 'speak to someone', 'reach out', 'book a call', 'schedule a call', 'consultation', 'fix my', 'fix our', 'solve my', 'solve our', 'help with my', 'help with our', 'issue with my', 'issue with our', 'problem with my', 'problem with our', 'implement for us', 'set up for us'];
-    $topicTerms = ['netsuite', 'erp', 'suitecloud', 'suitescript', 'suiteanalytics', 'saved search', 'workflow', 'accounting', 'inventory', 'invoice', 'order management', 'procurement', 'warehouse', 'crm', 'integration', 'automation', 'artificial intelligence', ' ai ', 'ai agent', 'business process', 'financial close', 'demand planning'];
     $normalizedMessage = preg_replace('/\s+/', ' ', strtolower(trim($message)));
     $genericHelpRequests = ['i need help', 'help me', 'i need assistance', 'can someone help', 'need some help'];
     $isGenericHelpRequest = in_array($normalizedMessage, $genericHelpRequests, true);
-    // A short message after an in-scope answer is treated as a contextual follow-up.
-    // This covers natural turns such as "another tip", "why?", and "what else?".
-    $isScopedFollowup = text_length($message) <= 180 && ($session['last_in_scope'] ?? false) === true;
-    $isInScope = contains_any($currentScope, $topicTerms) || $isScopedFollowup;
+    $isInScope = cloudsys_chat_in_scope($message, ($session['last_in_scope'] ?? false) === true);
     $isHandoffFollowup = cloudsys_chat_handoff_followup($message, ($session['last_handoff'] ?? false) === true);
 
     if ($isGenericHelpRequest || contains_any($currentScope, $handoffTerms) || $isHandoffFollowup) {

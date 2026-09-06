@@ -5,3 +5,4 @@ work/
 outputs/cloudsys-config.php
 login.html
 admin/index.html
+deployment/*_before_*.sql

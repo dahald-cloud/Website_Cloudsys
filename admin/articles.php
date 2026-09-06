@@ -4,7 +4,7 @@ require_once dirname(__DIR__) . '/includes/articles.php';
 header('Cache-Control: no-store, private');
 header('X-Robots-Tag: noindex, nofollow');
 try {
-    cloudsys_require_admin();
+    $admin = cloudsys_require_admin();
     $counts = cloudsys_admin_article_counts();
     $page = max(1, min(100000, (int) ($_GET['page'] ?? 1)));
     $page = min($page, max(1, (int) ceil((int) $counts['total'] / 20)));
@@ -22,11 +22,11 @@ try {
 <title>Articles | CloudSys admin</title><meta name="robots" content="noindex, nofollow">
 <link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/admin-styles.css">
 <link rel="stylesheet" href="/article-admin.css">
-</head><body class="admin-dashboard-shell"><header class="admin-header"><a href="/admin/">Back to website controls</a></header>
+</head><body class="admin-dashboard-shell"><header class="admin-header"><a class="brand" href="/admin/" aria-label="CloudSys website controls"><img src="/assets/cloudsys-logo.png" width="794" height="243" alt="CloudSys"></a><nav class="admin-context-nav" aria-label="Administrator navigation"><a href="/admin/">Website controls</a><a href="/admin/articles.php" aria-current="page">Articles</a></nav><div class="admin-account"><a href="/change-password">Change password</a><span><?= cloudsys_article_escape($admin['display_name']) ?></span><form method="post" action="/logout.php"><input type="hidden" name="csrf" value="<?= cloudsys_article_escape(cloudsys_csrf_token()) ?>"><button>Sign out</button></form></div></header>
 <main class="admin-dashboard article-workspace"><p class="admin-eyebrow">ARTICLES</p><h1>Your articles</h1>
 <p>Total: <?= (int) $counts['total'] ?> · Drafts: <?= (int) $counts['drafts'] ?> · Public: <?= (int) $counts['published'] ?></p>
-<p><a href="/admin/edit-article.php">Create an article →</a></p>
-<?php if (!$rows): ?><p>No articles yet. Create your first draft to get started.</p><?php else: ?>
+<p><a class="admin-primary-link article-create-link" href="/admin/edit-article.php">Create an article <span>→</span></a></p>
+<?php if (!$rows): ?><section class="admin-empty-state"><p class="admin-eyebrow">NO ARTICLES YET</p><h2>Start with your first useful insight.</h2><p>Create a draft, preview it privately, and publish only when it is ready.</p><a href="/admin/edit-article.php">Create your first draft →</a></section><?php else: ?>
 <div class="article-table-wrap"><table class="article-table"><thead><tr><th scope="col">Title</th><th scope="col">Category</th><th scope="col">Status</th><th scope="col">Actions</th></tr></thead><tbody>
 <?php foreach ($rows as $row): ?><tr><td><?= cloudsys_article_escape($row['title']) ?></td><td><?= cloudsys_article_escape($row['category_name']) ?></td><td><?= cloudsys_article_escape($row['status']) ?></td><td><div class="article-list-actions"><a href="/admin/edit-article.php?id=<?= (int) $row['id'] ?>">Edit</a><a href="/admin/preview-article.php?id=<?= (int) $row['id'] ?>" target="_blank" rel="noopener">Preview</a></div></td></tr><?php endforeach; ?>
 </tbody></table></div><nav class="article-pagination" aria-label="Article pages"><?php if ($page > 1): ?><a href="?page=<?= $page-1 ?>">Previous</a><?php endif; ?><span>Page <?= $page ?></span><?php if ($page * 20 < (int) $counts['total']): ?><a href="?page=<?= $page+1 ?>">Next</a><?php endif; ?></nav>
