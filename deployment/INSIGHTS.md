@@ -29,7 +29,7 @@ All writes use the existing admin authorization, CSRF tokens, prepared statement
 
 ### Image requirements
 
-Enable PHP GD and Fileinfo. Configure `upload_max_filesize` at least `4M` and `post_max_size` at least `6M`; use a suitable PHP memory limit (128 MB or more). Only JPEG/PNG up to 4 MB and 6 megapixels are accepted. Files are decoded and re-encoded as JPEG (max 1920 pixels), discarding original filenames and metadata. Transparency becomes white.
+Enable PHP GD and Fileinfo. Configure `upload_max_filesize` at least `4M` and `post_max_size` at least `6M`; use a suitable PHP memory limit (128 MB or more). Only JPEG/PNG up to 4 MB and 6 megapixels are accepted. Files are decoded, center-cropped to 8:5, and re-encoded as an exact 1600 × 1000 JPEG, discarding original filenames and metadata. Common JPEG phone-camera orientation is normalized when EXIF support is available. Transparency becomes white.
 
 The application creates `cloudsys-article-media` beside `public_html` with mode 0700 and stores random-named files as 0600. The PHP user must be allowed to write this location. Back up this directory with the database. No new environment values or schema migration beyond Phase 1 are required. The public directory must not contain a copy of private media.
 

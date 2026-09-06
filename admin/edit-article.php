@@ -58,7 +58,7 @@ $e = 'cloudsys_article_escape';
 <label>Category<select name="category_id" required><option value="">Choose a category</option><?php foreach ($categories as $category): ?><option value="<?= (int) $category['id'] ?>" <?= (string) $values['category_id'] === (string) $category['id'] ? 'selected' : '' ?>><?= $e($category['name']) ?></option><?php endforeach; ?></select></label>
 <label>Author display name<input name="author_name" required maxlength="100" value="<?= $e($values['author_name']) ?>"></label>
 <?php if (!empty($article['cover_image_path'])): ?><img class="editor-cover" src="/article-media.php?id=<?= $id ?>" alt="<?= $e($article['cover_image_alt']) ?>"><label class="editor-checkbox"><input type="checkbox" name="remove_cover" value="1">Remove current cover</label><?php endif; ?>
-<label>Cover image<input type="file" name="cover" accept="image/jpeg,image/png"></label><p class="editor-help">JPEG or PNG, up to 4 MB and 6 megapixels. Re-encoded to JPEG, maximum 1920 pixels.</p>
+<label>Cover image<input type="file" name="cover" accept="image/jpeg,image/png"></label><p class="editor-help">JPEG or PNG, up to 4 MB and 6 megapixels. Automatically center-cropped and saved at exactly 1600 × 1000 pixels (8:5).</p>
 <label>Image description<input name="cover_image_alt" maxlength="255" value="<?= $e($values['cover_image_alt']) ?>"></label>
 <label>SEO title<input name="seo_title" maxlength="200" value="<?= $e($values['seo_title']) ?>"></label>
 <label>SEO description<textarea name="seo_description" maxlength="500" rows="3"><?= $e($values['seo_description']) ?></textarea></label><p class="editor-help">Leave SEO fields blank to use the article title and summary.</p>

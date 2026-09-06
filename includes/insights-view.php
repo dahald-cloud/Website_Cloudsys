@@ -32,7 +32,7 @@ function cloudsys_insights_head(string $title, string $description, string $cano
 <link rel="icon" href="/assets/cloudsys-logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Newsreader:ital,wght@1,500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/form-styles.css"><link rel="stylesheet" href="/accessibility.css"><link rel="stylesheet" href="/insights.css">
+<link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/form-styles.css"><link rel="stylesheet" href="/accessibility.css"><link rel="stylesheet" href="/insights.css?v=20260906-1">
 <script src="/cookie-consent.js" defer></script>
 <script src="/form.js" defer></script><link rel="stylesheet" href="/navigation.css">
 </head><body class="insights-page">

@@ -33,6 +33,8 @@ foreach ([['title' => []], ['title' => ''], ['title' => str_repeat('x', 11)], ['
     insights_check($rejected, 'Invalid editor input accepted.');
 }
 insights_check(cloudsys_article_upload([]) === null, 'No-file upload should be optional.');
+insights_check(cloudsys_article_cover_crop(2000, 1000) === [200, 0, 1600, 1000], 'Wide cover crop is incorrect.');
+insights_check(cloudsys_article_cover_crop(1000, 1000) === [0, 187, 1000, 625], 'Tall cover crop is incorrect.');
 $rejected = false;
 try { cloudsys_article_upload(['error' => UPLOAD_ERR_OK, 'tmp_name' => __FILE__]); } catch (DomainException $error) { $rejected = true; }
 insights_check($rejected, 'Non-uploaded local file accepted.');

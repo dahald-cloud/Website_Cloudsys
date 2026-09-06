@@ -27,6 +27,20 @@ function cloudsys_editor_field(array $input, string $key, int $max, bool $requir
     return $value;
 }
 
+function cloudsys_article_cover_crop(int $width, int $height): array
+{
+    if ($width < 1 || $height < 1) throw new InvalidArgumentException('Image dimensions must be positive.');
+    $targetRatio = 8 / 5;
+    if ($width / $height > $targetRatio) {
+        $cropHeight = $height;
+        $cropWidth = max(1, (int) round($height * $targetRatio));
+        return [(int) floor(($width - $cropWidth) / 2), 0, $cropWidth, $cropHeight];
+    }
+    $cropWidth = $width;
+    $cropHeight = max(1, (int) round($width / $targetRatio));
+    return [0, (int) floor(($height - $cropHeight) / 2), $cropWidth, $cropHeight];
+}
+
 function cloudsys_article_upload(array $file): ?string
 {
     $error = $file['error'] ?? UPLOAD_ERR_NO_FILE;
@@ -40,16 +54,32 @@ function cloudsys_article_upload(array $file): ?string
     if (!$size || $size[0] < 1 || $size[1] < 1 || $size[0] > 6000 || $size[1] > 6000 || $size[0] * $size[1] > 6000000) throw new DomainException('Use an image under 6 megapixels and 6000 pixels per side.');
     $image = $type === 'image/jpeg' ? @imagecreatefromjpeg($file['tmp_name']) : @imagecreatefrompng($file['tmp_name']);
     if (!$image) throw new DomainException('That image could not be decoded.');
+    if ($type === 'image/jpeg' && function_exists('exif_read_data')) {
+        $metadata = @exif_read_data($file['tmp_name']);
+        $orientation = is_array($metadata) ? (int) ($metadata['Orientation'] ?? 1) : 1;
+        $rotated = match ($orientation) {
+            3 => imagerotate($image, 180, 0),
+            6 => imagerotate($image, -90, 0),
+            8 => imagerotate($image, 90, 0),
+            default => false,
+        };
+        if ($rotated !== false) {
+            imagedestroy($image);
+            $image = $rotated;
+        }
+    }
     $directory = cloudsys_article_media_directory();
     if (!is_dir($directory) && !mkdir($directory, 0700, true) && !is_dir($directory)) throw new RuntimeException('Cannot create private image directory.');
     $name = bin2hex(random_bytes(24)) . '.jpg';
     $path = $directory . DIRECTORY_SEPARATOR . $name;
-    $ratio = min(1, 1920 / max($size[0], $size[1]));
-    $width = max(1, (int) round($size[0] * $ratio)); $height = max(1, (int) round($size[1] * $ratio));
+    $sourceWidth = imagesx($image); $sourceHeight = imagesy($image);
+    [$sourceX, $sourceY, $cropWidth, $cropHeight] = cloudsys_article_cover_crop($sourceWidth, $sourceHeight);
+    $width = 1600; $height = 1000;
     $output = imagecreatetruecolor($width, $height);
+    if (!$output) { imagedestroy($image); throw new RuntimeException('Unable to prepare the cover image.'); }
     try {
         imagefill($output, 0, 0, imagecolorallocate($output, 255, 255, 255));
-        imagecopyresampled($output, $image, 0, 0, 0, 0, $width, $height, $size[0], $size[1]);
+        if (!imagecopyresampled($output, $image, 0, 0, $sourceX, $sourceY, $width, $height, $cropWidth, $cropHeight)) throw new RuntimeException('Unable to resize the cover image.');
         if (!imagejpeg($output, $path, 85) || !chmod($path, 0600)) throw new RuntimeException('Unable to store image securely.');
     } catch (Throwable $failure) {
         if (is_file($path)) unlink($path);
