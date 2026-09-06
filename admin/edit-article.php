@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once dirname(__DIR__) . '/includes/article-editor.php';
+require_once dirname(__DIR__) . '/includes/admin-ui.php';
 header('Cache-Control: no-store, private'); header('X-Robots-Tag: noindex, nofollow');
 try {
     $admin = cloudsys_require_admin();
@@ -37,8 +38,8 @@ $e = 'cloudsys_article_escape';
 <title><?= $id ? 'Edit article' : 'New article' ?> | CloudSys</title><meta name="robots" content="noindex,nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css?v=20260906-2"><link rel="stylesheet" href="/admin-styles.css?v=20260906-2"><link rel="stylesheet" href="/article-admin.css?v=20260906-2"><script src="/article-editor.js?v=20260906-2" defer></script></head>
-<body class="admin-dashboard-shell"><header class="admin-header"><a class="brand" href="/admin/" aria-label="CloudSys website controls"><img src="/assets/cloudsys-logo.png" width="794" height="243" alt="CloudSys"></a><nav class="admin-context-nav" aria-label="Administrator navigation"><a href="/admin/">Website controls</a><a href="/admin/articles.php" aria-current="page">Articles</a></nav><div class="admin-account"><a href="/change-password">Change password</a><span><?= $e($admin['display_name']) ?></span><form method="post" action="/logout.php"><input type="hidden" name="csrf" value="<?= $e(cloudsys_csrf_token()) ?>"><button>Sign out</button></form></div></header>
+<link rel="stylesheet" href="/style.css?v=20260906-3"><link rel="stylesheet" href="/admin-styles.css?v=20260906-3"><link rel="stylesheet" href="/article-admin.css?v=20260906-3"><script src="/article-editor.js?v=20260906-3" defer></script></head>
+<body class="admin-dashboard-shell"><?php cloudsys_admin_header($admin, 'articles'); ?>
 <main class="admin-dashboard article-workspace"><p class="admin-eyebrow">PUBLISHING</p><h1><?= $id ? 'Edit article' : 'New article' ?></h1>
 <p>Status: <strong><?= $e($article['status'] ?? 'draft') ?></strong>. Saving a published article updates the live page. Unpublish it first to work privately.</p>
 <?php if (!empty($article['published_at'])): ?><p>Publication date (UTC): <?= $e($article['published_at']) ?></p><?php endif; ?>

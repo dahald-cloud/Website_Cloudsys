@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once dirname(__DIR__) . '/includes/bootstrap.php';
+require_once dirname(__DIR__) . '/includes/admin-ui.php';
 header('Cache-Control: no-store, private');
 header('X-Frame-Options: DENY');
 header('X-Content-Type-Options: nosniff');
@@ -44,15 +45,11 @@ try {
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/style.css?v=20260906-2" />
-  <link rel="stylesheet" href="/admin-styles.css?v=20260906-2" />
+  <link rel="stylesheet" href="/style.css?v=20260906-3" />
+  <link rel="stylesheet" href="/admin-styles.css?v=20260906-3" />
 </head>
 <body class="admin-dashboard-shell">
-  <header class="admin-header">
-    <a class="brand" href="/admin/" aria-label="CloudSys website controls"><img src="/assets/cloudsys-logo.png" width="794" height="243" alt="CloudSys" /></a>
-    <nav class="admin-context-nav" aria-label="Administrator navigation"><a href="/admin/" aria-current="page">Website controls</a><a href="/admin/articles.php">Articles</a></nav>
-    <div class="admin-account"><a href="/change-password">Change password</a><span><?= htmlspecialchars((string) $admin['display_name'], ENT_QUOTES, 'UTF-8') ?></span><form method="post" action="/logout.php"><input type="hidden" name="csrf" value="<?= htmlspecialchars(cloudsys_csrf_token(), ENT_QUOTES, 'UTF-8') ?>" /><button type="submit">Sign out</button></form></div>
-  </header>
+  <?php cloudsys_admin_header($admin, 'controls'); ?>
   <main class="admin-dashboard">
     <p class="admin-eyebrow">WEBSITE CONTROLS</p>
     <div class="admin-title-row"><div><h1>Chatbot access</h1><p>Choose who can see and use the CloudSys guide. The API enforces the same setting.</p></div><a href="../" target="_blank" rel="noopener">View website &nearr;</a></div>
