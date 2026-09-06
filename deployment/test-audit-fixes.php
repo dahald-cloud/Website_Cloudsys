@@ -25,14 +25,14 @@ if (($argv[1] ?? '') === '--worker') {
     exit;
 }
 
-foreach (['What is ERP?', 'How do saved searches work?', 'Give me a NetSuite tip', 'What can AI agents do?'] as $question) {
-    audit_check(!cloudsys_chat_handoff_followup($question, true), 'New topic incorrectly inherited handoff.');
-}
-audit_check(cloudsys_chat_handoff_followup('Yes please!', true), 'Handoff continuation lost.');
-audit_check(!cloudsys_chat_handoff_followup('Yes please!', false), 'Handoff invented.');
-audit_check(cloudsys_chat_in_scope("what's a sales order?", false), 'Sales-order question rejected as out of scope.');
-audit_check(cloudsys_chat_in_scope('how do you use it?', true), 'Contextual ERP follow-up rejected.');
-audit_check(!cloudsys_chat_in_scope('write me a holiday poem', false), 'Unrelated topic accepted as in scope.');
+[$scope, $reply] = cloudsys_parse_chat_completion("SCOPE: IN\nA sales order records a customer's commitment.");
+audit_check($scope === 'in' && str_contains($reply, 'sales order'), 'In-scope model reply parsing failed.');
+[$scope] = cloudsys_parse_chat_completion("**SCOPE: HANDOFF**\nA specialist should review your setup.");
+audit_check($scope === 'handoff', 'Handoff model reply parsing failed.');
+[$scope] = cloudsys_parse_chat_completion("SCOPE: OUT\nThat topic is outside this guide.");
+audit_check($scope === 'out', 'Out-of-scope model reply parsing failed.');
+[$scope, $reply] = cloudsys_parse_chat_completion('An unstructured provider reply.');
+audit_check($scope === 'out' && str_contains($reply, 'NetSuite'), 'Malformed model reply did not fail closed.');
 
 $fixture = ['id' => 1, 'slug' => 'preview', 'title' => '<script>Preview</script>', 'summary' => 'Summary', 'body_text' => "## Heading\n\nBody", 'author_name' => 'CloudSys', 'published_at' => null, 'category_slug' => 'netsuite', 'category_name' => 'NetSuite', 'cover_image_path' => null];
 ob_start(); cloudsys_render_insights_article($fixture); $rendered = ob_get_clean();
@@ -45,7 +45,7 @@ foreach (['cloudsys-config.php', 'cloudsys-config.php.bak', '.env', '.env.produc
     audit_check(preg_match('~' . $rule[1] . '~', $name) === 1, 'Private configuration not denied: ' . $name);
 }
 audit_check(!is_file(dirname(__DIR__) . '/cloudsys-config.php'), 'Private config remains in public folder.');
-echo "Handoff routing, shared preview, and private config checks passed.\n";
+echo "Semantic chat routing, shared preview, and private config checks passed.\n";
 
 $directory = sys_get_temp_dir() . '/cloudsys-audit-test-' . bin2hex(random_bytes(10));
 mkdir($directory, 0700);
