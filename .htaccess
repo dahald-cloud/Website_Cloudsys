@@ -1,0 +1,63 @@
+Options -Indexes
+DirectoryIndex index.html index.php
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Consolidate every public URL onto the secure, non-www hostname.
+  RewriteCond %{HTTPS} !=on [OR]
+  RewriteCond %{HTTP_HOST} !^cloudsysllc\.com$ [NC]
+  RewriteRule ^ https://cloudsysllc.com%{REQUEST_URI} [R=301,L,NE]
+
+  # Keep the homepage at / instead of exposing the directory index filename.
+  RewriteCond %{THE_REQUEST} \s/+index\.html(?:[?\s]) [NC]
+  RewriteRule ^index\.html$ https://cloudsysllc.com/ [R=301,L,NE]
+
+  # Keep the robots.txt sitemap URL stable; PHP adds published articles.
+  RewriteRule ^sitemap(?:-pages|-articles-[1-9][0-9]{0,4})?\.xml$ sitemap.php [END]
+
+  RewriteCond %{THE_REQUEST} \s/+insights\.php(?:[?\s]) [NC]
+  RewriteRule ^insights\.php$ /insights [R=301,L]
+  RewriteRule ^insights/$ /insights [R=301,L]
+  RewriteRule ^insights$ insights.php [END]
+
+  # Article controller validates REQUEST_URI, not query-supplied slugs.
+  RewriteRule ^insights/([a-z0-9]+(?:-[a-z0-9]+)*)/$ /insights/$1 [R=301,L]
+  RewriteRule ^insights/([a-z0-9]+(?:-[a-z0-9]+)*)$ article.php [END]
+
+  # Keep the implementation filename out of normal browser URLs.
+  RewriteCond %{REQUEST_METHOD} =GET
+  RewriteCond %{THE_REQUEST} \s/+login\.php(?:[?\s]) [NC]
+  RewriteRule ^login\.php$ /login [R=302,L]
+
+  # Serve the admin sign-in page at /login without exposing a public link.
+  RewriteRule ^login/?$ login.php [L,QSA]
+  RewriteRule ^forgot-password/?$ forgot-password.php [L,QSA]
+  RewriteRule ^reset-password/?$ reset-password.php [L,QSA]
+  RewriteRule ^change-password/?$ change-password.php [L,QSA]
+</IfModule>
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "DENY"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+  Header always set Content-Security-Policy "default-src 'self'; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; script-src 'self' https://challenges.cloudflare.com; connect-src 'self' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+</IfModule>
+
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/css "access plus 1 day"
+  ExpiresByType application/javascript "access plus 1 day"
+  ExpiresByType image/png "access plus 1 day"
+  ExpiresByType image/jpeg "access plus 1 day"
+  ExpiresByType image/avif "access plus 1 day"
+</IfModule>
+
+<FilesMatch "(?i)(^\.env(?:\..*)?$|^cloudsys-config(?:\..*)?$|^bootstrap\.php$|^create-admin\.php$|^schema\.sql$|^package(-lock)?\.json$|^server(?:\.test)?\.js$)">
+  Require all denied
+</FilesMatch>
+
+<IfModule mod_alias.c>
+  RedirectMatch 404 ^/deployment(?:/|$)
+</IfModule>

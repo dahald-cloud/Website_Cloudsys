@@ -1,6 +1,15 @@
 User-agent: *
 Allow: /
-Disallow: /node_modules/
+Disallow: /admin/
+Disallow: /api/
+Disallow: /includes/
+Disallow: /deployment/
+Disallow: /login
+Disallow: /login.php
+Disallow: /logout.php
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /change-password
 Disallow: /work/
 Disallow: /outputs/
 

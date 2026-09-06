@@ -1,3 +1,7 @@
-node_modules/
 .env
-.env.example
+cloudsys-config.php
+.DS_Store
+work/
+outputs/cloudsys-config.php
+login.html
+admin/index.html
