@@ -38,7 +38,7 @@ $e = 'cloudsys_article_escape';
 <title><?= $id ? 'Edit article' : 'New article' ?> | CloudSys</title><meta name="robots" content="noindex,nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css?v=20260906-4"><link rel="stylesheet" href="/admin-styles.css?v=20260906-4"><link rel="stylesheet" href="/article-admin.css?v=20260906-4"><script src="/article-editor.js?v=20260906-4" defer></script></head>
+<link rel="stylesheet" href="/style.css?v=20260906-5"><link rel="stylesheet" href="/admin-styles.css?v=20260906-5"><link rel="stylesheet" href="/article-admin.css?v=20260906-5"><script src="/article-editor.js?v=20260906-5" defer></script></head>
 <body class="admin-dashboard-shell"><?php cloudsys_admin_header($admin, 'articles'); ?>
 <main class="admin-dashboard article-workspace"><p class="admin-eyebrow">PUBLISHING</p><h1><?= $id ? 'Edit article' : 'New article' ?></h1>
 <p>Status: <strong><?= $e($article['status'] ?? 'draft') ?></strong>. Saving a published article updates the live page. Unpublish it first to work privately.</p>
@@ -48,17 +48,28 @@ $e = 'cloudsys_article_escape';
 <input type="hidden" name="csrf" value="<?= $e(cloudsys_csrf_token()) ?>"><input type="hidden" name="id" value="<?= (int) $id ?>"><input type="hidden" name="revision" value="<?= $e($revision) ?>"><input type="hidden" name="MAX_FILE_SIZE" value="4194304">
 <div class="editor-main">
 <label>Title<input id="article-title" name="title" required maxlength="200" value="<?= $e($values['title']) ?>"></label>
-<label>Summary<textarea name="summary" rows="3" maxlength="500"><?= $e($values['summary']) ?></textarea></label>
+<label>Summary<textarea id="article-summary" name="summary" rows="3" maxlength="500"><?= $e($values['summary']) ?></textarea></label>
 <div class="editor-field-heading"><label for="article-body">Article text</label><p>The article title above is Heading 1 (H1). Structure the article with H2 sections and H3 subsections.</p></div>
 <div class="editor-toolbar" role="group" aria-label="Insert article formatting"><button type="button" data-paragraph title="Insert a normal body paragraph"><span class="editor-format-mark">P</span><span>Paragraph</span></button><button type="button" data-prefix="## " title="Insert a Heading 2 for a major article section"><span class="editor-format-mark">H2</span><span>Section heading</span></button><button type="button" data-prefix="### " title="Insert a Heading 3 inside a section"><span class="editor-format-mark">H3</span><span>Subheading</span></button><button type="button" data-wrap="**"><span class="editor-format-mark">B</span><span>Bold</span></button><button type="button" data-prefix="- "><span class="editor-format-mark">•</span><span>Bullet list</span></button><button type="button" data-prefix="1. "><span class="editor-format-mark">1.</span><span>Numbered list</span></button><button type="button" data-link><span class="editor-format-mark">↗</span><span>Link</span></button></div>
 <textarea id="article-body" name="body_text" rows="24" maxlength="50000" aria-describedby="format-help"><?= $e($values['body_text']) ?></textarea>
 <p id="format-help" class="editor-help">Select text and choose Paragraph, H2, H3, or another formatting button. Paragraph creates normal body text with the required spacing. HTML is displayed as text. Save before opening the preview.</p>
+<section class="editor-live-preview" aria-labelledby="live-preview-title">
+  <div class="editor-preview-label"><span>LIVE PREVIEW</span><small>Approximate public article appearance</small></div>
+  <article>
+    <span id="preview-category" class="editor-preview-category">Category</span>
+    <h1 id="live-preview-title">Your article title</h1>
+    <p id="preview-summary" class="editor-preview-summary">Your article summary will appear here.</p>
+    <p id="preview-byline" class="editor-preview-byline">CloudSys</p>
+    <div class="editor-preview-cover-wrap"<?= !empty($article['cover_image_path']) ? '' : ' hidden' ?>><img id="preview-cover" src="<?= !empty($article['cover_image_path']) ? '/article-media.php?id=' . (int) $id : '' ?>" alt=""></div>
+    <div id="preview-body" class="article-prose editor-preview-body"><p>Your formatted article text will appear here.</p></div>
+  </article>
+</section>
 </div><aside class="editor-settings">
 <label>URL slug<input id="article-slug" name="slug" required maxlength="160" pattern="[a-z0-9]+(-[a-z0-9]+)*" <?= $id ? 'readonly' : '' ?> value="<?= $e($values['slug']) ?>"></label><p class="editor-help">/insights/your-slug — fixed after the first save.</p>
-<label>Category<select name="category_id" required><option value="">Choose a category</option><?php foreach ($categories as $category): ?><option value="<?= (int) $category['id'] ?>" <?= (string) $values['category_id'] === (string) $category['id'] ? 'selected' : '' ?>><?= $e($category['name']) ?></option><?php endforeach; ?></select></label>
-<label>Author display name<input name="author_name" required maxlength="100" value="<?= $e($values['author_name']) ?>"></label>
+<label>Category<select id="article-category" name="category_id" required><option value="">Choose a category</option><?php foreach ($categories as $category): ?><option value="<?= (int) $category['id'] ?>" <?= (string) $values['category_id'] === (string) $category['id'] ? 'selected' : '' ?>><?= $e($category['name']) ?></option><?php endforeach; ?></select></label>
+<label>Author display name<input id="article-author" name="author_name" required maxlength="100" value="<?= $e($values['author_name']) ?>"></label>
 <?php if (!empty($article['cover_image_path'])): ?><img class="editor-cover" src="/article-media.php?id=<?= $id ?>" alt="<?= $e($article['cover_image_alt']) ?>"><label class="editor-checkbox"><input type="checkbox" name="remove_cover" value="1">Remove current cover</label><?php endif; ?>
-<label>Cover image<input type="file" name="cover" accept="image/jpeg,image/png"></label><p class="editor-help">JPEG or PNG, up to 4 MB and 6 megapixels. Automatically center-cropped and saved at exactly 1600 × 1000 pixels (8:5).</p>
+<label>Cover image<input id="article-cover" type="file" name="cover" accept="image/jpeg,image/png"></label><p class="editor-help">JPEG or PNG, up to 4 MB and 6 megapixels. Automatically center-cropped and saved at exactly 1600 × 1000 pixels (8:5).</p>
 <label>Image description<input name="cover_image_alt" maxlength="255" value="<?= $e($values['cover_image_alt']) ?>"></label>
 <label>SEO title<input name="seo_title" maxlength="200" value="<?= $e($values['seo_title']) ?>"></label>
 <label>SEO description<textarea name="seo_description" maxlength="500" rows="3"><?= $e($values['seo_description']) ?></textarea></label><p class="editor-help">Leave SEO fields blank to use the article title and summary.</p>
