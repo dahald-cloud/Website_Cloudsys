@@ -47,6 +47,11 @@ foreach (['cloudsys-config.php', 'cloudsys-config.php.bak', '.env', '.env.produc
 audit_check(str_contains($rules, 'RedirectMatch 404 ^/includes'), 'Internal PHP include directory is not denied.');
 audit_check(str_contains($rules, '^\.user\.ini$'), 'PHP production settings file is not denied.');
 audit_check(!is_file(dirname(__DIR__) . '/cloudsys-config.php'), 'Private config remains in public folder.');
+audit_check(str_contains(cloudsys_article_video_embed('https://youtu.be/dQw4w9WgXcQ'), 'youtube-nocookie.com/embed/dQw4w9WgXcQ'), 'Approved YouTube embed failed.');
+audit_check(cloudsys_article_video_embed('https://example.com/video') === '', 'Unapproved video host was accepted.');
+$visibility = array_fill_keys(array_keys(cloudsys_managed_pages()), true); $visibility['about'] = false;
+audit_check(!str_contains(cloudsys_filter_hidden_links('<nav><a href="/about.html">About</a><a href="/faq.html">FAQ</a></nav>', $visibility), 'About</a>'), 'Hidden page remained in navigation.');
+audit_check(str_contains(cloudsys_filter_hidden_links('<nav><a href="/about.html">About</a><a href="/faq.html">FAQ</a></nav>', $visibility), 'FAQ</a>'), 'Visible page was removed from navigation.');
 echo "Semantic chat routing, shared preview, and private config checks passed.\n";
 
 $directory = sys_get_temp_dir() . '/cloudsys-audit-test-' . bin2hex(random_bytes(10));

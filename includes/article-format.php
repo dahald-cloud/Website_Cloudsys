@@ -28,6 +28,17 @@ function cloudsys_article_body(string $source): string
     };
     foreach (preg_split('/\R/', $source) ?: [] as $line) {
         if (trim($line) === '') { $flush(); continue; }
+        if (preg_match('~^\[video\]\((https?://[^\s)<>"\x27]+)\)$~i', trim($line), $video)) {
+            $flush();
+            $embed = cloudsys_article_video_embed($video[1]);
+            $html .= $embed !== '' ? $embed : '<p class="article-media-error">Video unavailable.</p>';
+            continue;
+        }
+        if (preg_match('~^!\[([^\]\r\n]{1,255})\]\(/article-inline-media\.php\?id=([1-9][0-9]{0,18})\)$~', trim($line), $image)) {
+            $flush();
+            $html .= '<figure class="article-inline-image"><img src="/article-inline-media.php?id=' . (int) $image[2] . '" alt="' . cloudsys_article_escape($image[1]) . '" width="1600" height="1000" loading="lazy"></figure>';
+            continue;
+        }
         if (preg_match('/^(#{2,3})\s+(.+)$/', $line, $heading)) {
             $flush(); $tag = strlen($heading[1]) === 2 ? 'h2' : 'h3';
             $html .= '<' . $tag . '>' . cloudsys_article_inline($heading[2]) . '</' . $tag . '>'; continue;
@@ -42,6 +53,18 @@ function cloudsys_article_body(string $source): string
     }
     $flush();
     return $html;
+}
+
+function cloudsys_article_video_embed(string $url): string
+{
+    if (preg_match('~\Ahttps?://(?:www\.)?(?:youtube\.com/watch\?v=|youtu\.be/)([A-Za-z0-9_-]{11})(?:[&#?].*)?\z~i', $url, $match)) {
+        $src = 'https://www.youtube-nocookie.com/embed/' . $match[1];
+    } elseif (preg_match('~\Ahttps?://(?:www\.)?vimeo\.com/([0-9]{6,12})(?:[/?#].*)?\z~i', $url, $match)) {
+        $src = 'https://player.vimeo.com/video/' . $match[1];
+    } else {
+        return '';
+    }
+    return '<div class="article-video"><iframe src="' . cloudsys_article_escape($src) . '" title="Embedded article video" loading="lazy" allowfullscreen></iframe></div>';
 }
 
 function cloudsys_article_media_directory(): string

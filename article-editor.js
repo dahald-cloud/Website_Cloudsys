@@ -13,6 +13,9 @@ const previewByline = document.querySelector('#preview-byline');
 const previewBody = document.querySelector('#preview-body');
 const previewCover = document.querySelector('#preview-cover');
 const previewCoverWrap = document.querySelector('.editor-preview-cover-wrap');
+const previewDialog = document.querySelector('#article-preview-dialog');
+const previewOpen = document.querySelector('#preview-article-button');
+const previewClose = document.querySelector('#close-article-preview');
 let dirty = false;
 let slugEdited = Boolean(slugField?.value);
 let previewCoverUrl = '';
@@ -56,6 +59,44 @@ const renderBodyPreview = (source) => {
   };
   for (const line of lines) {
     if (!line.trim()) { flush(); continue; }
+    const video = line.match(/^\[video\]\((https?:\/\/[^\s)<>"']+)\)$/i);
+    if (video) {
+      flush();
+      const frame = document.createElement('div');
+      frame.className = 'article-video';
+      const iframe = document.createElement('iframe');
+      const youtube = video[1].match(/^https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{11})(?:[&#?].*)?$/i);
+      const vimeo = video[1].match(/^https?:\/\/(?:www\.)?vimeo\.com\/([0-9]{6,12})(?:[/?#].*)?$/i);
+      if (youtube) iframe.src = 'https://www.youtube-nocookie.com/embed/' + youtube[1];
+      else if (vimeo) iframe.src = 'https://player.vimeo.com/video/' + vimeo[1];
+      else {
+        const warning = document.createElement('p');
+        warning.className = 'editor-preview-warning';
+        warning.textContent = 'This video link is not an approved YouTube or Vimeo URL.';
+        previewBody.append(warning);
+        continue;
+      }
+      iframe.title = 'Embedded article video';
+      iframe.loading = 'lazy';
+      iframe.allowFullscreen = true;
+      frame.append(iframe);
+      previewBody.append(frame);
+      continue;
+    }
+    const image = line.match(/^!\[([^\]\r\n]{1,255})\]\(\/article-inline-media\.php\?id=([1-9][0-9]{0,18})\)$/);
+    if (image) {
+      flush();
+      const figure = document.createElement('figure');
+      figure.className = 'article-inline-image';
+      const element = document.createElement('img');
+      element.src = '/article-inline-media.php?id=' + image[2];
+      element.alt = image[1];
+      element.width = 1600;
+      element.height = 1000;
+      figure.append(element);
+      previewBody.append(figure);
+      continue;
+    }
     const heading = line.match(/^(#{2,3})\s+(.+)$/);
     if (heading) {
       flush();
@@ -119,7 +160,8 @@ document.querySelectorAll('.editor-toolbar button').forEach((button) => {
     if (button.hasAttribute('data-paragraph')) {
       const paragraph = selection.split('\n').map((line) => line.replace(/^(?:#{1,6}|[-*]|\d+\.)\s+/, '').trim()).filter(Boolean).join(' ');
       text = (start > 0 && !bodyField.value.slice(0, start).endsWith('\n\n') ? '\n\n' : '') + paragraph + (!bodyField.value.slice(end).startsWith('\n\n') ? '\n\n' : '');
-    } else if (button.hasAttribute('data-link')) text = `[${selection}](https://example.com)`;
+    } else if (button.hasAttribute('data-video')) text = '[video](' + (selection.startsWith('http') ? selection : 'https://www.youtube.com/watch?v=VIDEO_ID') + ')';
+    else if (button.hasAttribute('data-link')) text = `[${selection}](https://example.com)`;
     else if (button.dataset.wrap) text = button.dataset.wrap + selection + button.dataset.wrap;
     else text = (start > 0 && bodyField.value[start - 1] !== '\n' ? '\n' : '') + selection.split('\n').map((line) => button.dataset.prefix + line).join('\n') + '\n';
     bodyField.setRangeText(text, start, end, 'select'); bodyField.focus(); dirty = true;
@@ -131,4 +173,24 @@ editor?.addEventListener('submit', (event) => {
 });
 window.addEventListener('beforeunload', (event) => { if (dirty) { event.preventDefault(); event.returnValue = ''; } });
 window.addEventListener('unload', () => { if (previewCoverUrl) URL.revokeObjectURL(previewCoverUrl); });
+previewOpen?.addEventListener('click', () => {
+  updatePreview();
+  previewDialog?.showModal();
+  document.body.classList.add('preview-modal-open');
+});
+previewClose?.addEventListener('click', () => previewDialog?.close());
+previewDialog?.addEventListener('click', (event) => {
+  const box = previewDialog.getBoundingClientRect();
+  if (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom) previewDialog.close();
+});
+previewDialog?.addEventListener('close', () => document.body.classList.remove('preview-modal-open'));
+document.querySelectorAll('.editor-copy-code').forEach((button) => {
+  button.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(button.dataset.code || '');
+      button.textContent = 'Copied';
+      window.setTimeout(() => { button.textContent = 'Copy code'; }, 1600);
+    } catch { button.textContent = 'Select the code above'; }
+  });
+});
 updatePreview();

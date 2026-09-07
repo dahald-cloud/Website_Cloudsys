@@ -1,5 +1,6 @@
 Options -Indexes
-DirectoryIndex index.html index.php
+DirectoryIndex index.php index.html
+ErrorDocument 404 /404.php
 
 <IfModule mod_rewrite.c>
   RewriteEngine On
@@ -12,6 +13,9 @@ DirectoryIndex index.html index.php
   # Keep the homepage at / instead of exposing the directory index filename.
   RewriteCond %{THE_REQUEST} \s/+index\.html(?:[?\s]) [NC]
   RewriteRule ^index\.html$ https://cloudsysllc.com/ [R=301,L,NE]
+
+  # Route managed static pages through the visibility gate.
+  RewriteRule ^(?:netsuite-optimization|ai-agents|case-studies|managed-support|about|integrations-development|faq)\.html$ page.php [END]
 
   # Keep the robots.txt sitemap URL stable; PHP adds published articles.
   RewriteRule ^sitemap(?:-pages|-articles-[1-9][0-9]{0,4})?\.xml$ sitemap.php [END]
@@ -44,7 +48,7 @@ DirectoryIndex index.html index.php
   Header always set Referrer-Policy "strict-origin-when-cross-origin"
   Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
   Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
-  Header always set Content-Security-Policy "default-src 'self'; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; script-src 'self' https://challenges.cloudflare.com; connect-src 'self' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests"
+  Header always set Content-Security-Policy "default-src 'self'; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; script-src 'self' https://challenges.cloudflare.com; connect-src 'self' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com https://www.youtube-nocookie.com https://player.vimeo.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests"
 </IfModule>
 
 <IfModule mod_expires.c>

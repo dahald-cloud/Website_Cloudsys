@@ -23,8 +23,8 @@ try {
 <title>Articles | CloudSys admin</title><meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css?v=20260906-3"><link rel="stylesheet" href="/admin-styles.css?v=20260906-3">
-<link rel="stylesheet" href="/article-admin.css?v=20260906-3">
+<link rel="stylesheet" href="/style.css?v=20260907-1"><link rel="stylesheet" href="/admin-styles.css?v=20260907-1">
+<link rel="stylesheet" href="/article-admin.css?v=20260907-1">
 </head><body class="admin-dashboard-shell"><?php cloudsys_admin_header($admin, 'articles'); ?>
 <main class="admin-dashboard article-workspace"><p class="admin-eyebrow">ARTICLES</p><h1>Your articles</h1>
 <p>Total: <?= (int) $counts['total'] ?> · Drafts: <?= (int) $counts['drafts'] ?> · Public: <?= (int) $counts['published'] ?></p>

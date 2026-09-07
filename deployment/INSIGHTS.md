@@ -74,3 +74,11 @@ Phase 4 files: all public HTML pages, `navigation.css`, `form.js`, `includes/ins
 - After deployment is authorized, inspect a published article with Google's Rich Results Test and submit/refresh `/sitemap.xml` in Search Console. Neither schema nor a sitemap guarantees indexing or rich results.
 
 References: [Google Article structured data](https://developers.google.com/search/docs/appearance/structured-data/article), [Google sitemap guidance](https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap).
+
+## Page visibility and rich article media
+
+Before deploying this release, back up the database and import `deployment/migrate-page-visibility.sql` and `deployment/migrate-article-media.sql` in phpMyAdmin. Both files are repeat-safe. No new environment variables or Node process are required. The first migration seeds admin-controlled visibility for service and editorial pages; the second adds private, normalized inline article images.
+
+Hidden managed pages are removed from generated navigation and sitemaps and return the branded 404 at their direct URL. `robots.txt` is not used as the security boundary because it can disclose hidden paths; HTTP routing is the boundary. Article video syntax accepts only full YouTube or Vimeo URLs and renders privacy-enhanced/allowlisted iframes. Raw HTML remains escaped. Inline images are JPEG/PNG uploads normalized to 1600 × 1000 and stored beside `public_html` in `cloudsys-article-media`; include that directory in backups.
+
+After deployment, run PHP 8.3 lint on every changed PHP file and `php deployment/test-audit-fixes.php`. Verify page visibility in `/admin/`, a hidden page direct URL, `/sitemap-pages.xml`, modal preview keyboard/backdrop behavior, one inline image, and one YouTube or Vimeo embed before enabling the features for normal visitors.

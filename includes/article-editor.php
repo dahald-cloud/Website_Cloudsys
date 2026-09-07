@@ -88,6 +88,32 @@ function cloudsys_article_upload(array $file): ?string
     return $name;
 }
 
+function cloudsys_article_inline_media(int $articleId): array
+{
+    cloudsys_require_admin();
+    $query = cloudsys_db()->prepare('SELECT id, alt_text, created_at FROM article_media WHERE article_id = ? ORDER BY id');
+    $query->execute([$articleId]);
+    return $query->fetchAll();
+}
+
+function cloudsys_add_article_media(int $articleId, array $file, string $altText, string $csrf): int
+{
+    $admin = cloudsys_require_admin();
+    if (!cloudsys_verify_csrf($csrf)) throw new DomainException('Your session form expired. Refresh before uploading.');
+    $altText = cloudsys_editor_field(['alt' => $altText], 'alt', 255, true);
+    if (!cloudsys_editor_article($articleId)) throw new DomainException('Save the article before adding images.');
+    $name = cloudsys_article_upload($file);
+    if ($name === null) throw new DomainException('Choose an image to upload.');
+    try {
+        $statement = cloudsys_db()->prepare('INSERT INTO article_media (article_id, file_path, alt_text, uploaded_by, created_at) VALUES (?,?,?,?,UTC_TIMESTAMP())');
+        $statement->execute([$articleId, $name, $altText, (int) $admin['id']]);
+        return (int) cloudsys_db()->lastInsertId();
+    } catch (Throwable $error) {
+        @unlink(cloudsys_article_media_directory() . DIRECTORY_SEPARATOR . $name);
+        throw $error;
+    }
+}
+
 function cloudsys_save_article(array $input, array $file): int
 {
     $admin = cloudsys_require_admin();

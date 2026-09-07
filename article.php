@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/includes/insights-article.php';
+require_once __DIR__ . '/includes/site-pages.php';
 // No shared caching: unpublished content must not remain served from a cache.
 header('Cache-Control: no-store');
 header('X-Content-Type-Options: nosniff');
@@ -18,6 +19,10 @@ if (!is_string($path) || preg_match('~\A/insights/([a-z0-9]+(?:-[a-z0-9]+)*)\z~D
     exit('Article not found.');
 }
 try {
+    if (!cloudsys_page_is_visible('insights')) {
+        header('X-Robots-Tag: noindex, nofollow');
+        http_response_code(404); require __DIR__ . '/404.php'; exit;
+    }
     $article = cloudsys_published_article($match[1]);
 } catch (Throwable $error) {
     error_log('CloudSys article read failed: ' . $error->getMessage());

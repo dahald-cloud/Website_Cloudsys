@@ -6,6 +6,9 @@ header('X-Content-Type-Options: nosniff');
 if (!in_array($_SERVER['REQUEST_METHOD'] ?? 'GET', ['GET', 'HEAD'], true)) {
     header('Allow: GET, HEAD'); http_response_code(405); exit;
 }
+try {
+    if (!cloudsys_page_is_visible('insights')) { http_response_code(404); header('X-Robots-Tag: noindex, nofollow'); require __DIR__ . '/404.php'; exit; }
+} catch (Throwable $error) { error_log('Insights visibility failed: ' . $error->getMessage()); http_response_code(503); exit('Insights are temporarily unavailable.'); }
 $errorMessage = '';
 $filters = ['q' => '', 'category' => '', 'page' => 1];
 $categories = [];

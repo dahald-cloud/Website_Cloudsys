@@ -10,6 +10,7 @@ try {
     $article = $id ? cloudsys_editor_article($id) : null;
     if ($id && !$article) { http_response_code(404); exit('Article not found.'); }
     $categories = cloudsys_db()->query('SELECT id, name FROM article_categories ORDER BY sort_order, id')->fetchAll();
+    $inlineMedia = $id ? cloudsys_article_inline_media((int) $id) : [];
 } catch (Throwable $error) {
     error_log('Article editor startup: ' . $error->getMessage()); http_response_code(503); exit('The editor is temporarily unavailable. Check the Insights database installation.');
 }
@@ -19,6 +20,11 @@ $errorMessage = '';
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     try {
         if ((string) ($_POST['id'] ?? '') !== (string) $id) throw new DomainException('Article identity changed. Reload the editor.');
+        if (($_POST['action'] ?? '') === 'upload_media') {
+            if (!$id) throw new DomainException('Save the article before adding images.');
+            cloudsys_add_article_media((int) $id, is_array($_FILES['inline_media'] ?? null) ? $_FILES['inline_media'] : [], (string) ($_POST['inline_media_alt'] ?? ''), (string) ($_POST['csrf'] ?? ''));
+            header('Location: /admin/edit-article.php?id=' . $id . '&media=1', true, 303); exit;
+        }
         $savedId = cloudsys_save_article($_POST, is_array($_FILES['cover'] ?? null) ? $_FILES['cover'] : []);
         header('Location: /admin/edit-article.php?id=' . $savedId . '&saved=1', true, 303); exit;
     } catch (Throwable $error) {
@@ -38,32 +44,22 @@ $e = 'cloudsys_article_escape';
 <title><?= $id ? 'Edit article' : 'New article' ?> | CloudSys</title><meta name="robots" content="noindex,nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css?v=20260906-5"><link rel="stylesheet" href="/admin-styles.css?v=20260906-5"><link rel="stylesheet" href="/article-admin.css?v=20260906-5"><script src="/article-editor.js?v=20260906-5" defer></script></head>
+<link rel="stylesheet" href="/style.css?v=20260907-1"><link rel="stylesheet" href="/admin-styles.css?v=20260907-1"><link rel="stylesheet" href="/article-admin.css?v=20260907-1"><script src="/article-editor.js?v=20260907-1" defer></script></head>
 <body class="admin-dashboard-shell"><?php cloudsys_admin_header($admin, 'articles'); ?>
 <main class="admin-dashboard article-workspace"><p class="admin-eyebrow">PUBLISHING</p><h1><?= $id ? 'Edit article' : 'New article' ?></h1>
 <p>Status: <strong><?= $e($article['status'] ?? 'draft') ?></strong>. Saving a published article updates the live page. Unpublish it first to work privately.</p>
 <?php if (!empty($article['published_at'])): ?><p>Publication date (UTC): <?= $e($article['published_at']) ?></p><?php endif; ?>
-<?php if ($errorMessage): ?><p class="admin-alert" role="alert"><?= $e($errorMessage) ?> If you selected an image, choose it again before retrying.</p><?php elseif (isset($_GET['saved'])): ?><p class="admin-success" role="status">Article saved.</p><?php endif; ?>
+<?php if ($errorMessage): ?><p class="admin-alert" role="alert"><?= $e($errorMessage) ?> If you selected an image, choose it again before retrying.</p><?php elseif (isset($_GET['saved'])): ?><p class="admin-success" role="status">Article saved.</p><?php elseif (isset($_GET['media'])): ?><p class="admin-success" role="status">Article image uploaded. Insert its code where the image should appear.</p><?php endif; ?>
 <form method="post" enctype="multipart/form-data" class="article-editor" id="article-editor">
 <input type="hidden" name="csrf" value="<?= $e(cloudsys_csrf_token()) ?>"><input type="hidden" name="id" value="<?= (int) $id ?>"><input type="hidden" name="revision" value="<?= $e($revision) ?>"><input type="hidden" name="MAX_FILE_SIZE" value="4194304">
 <div class="editor-main">
 <label>Title<input id="article-title" name="title" required maxlength="200" value="<?= $e($values['title']) ?>"></label>
 <label>Summary<textarea id="article-summary" name="summary" rows="3" maxlength="500"><?= $e($values['summary']) ?></textarea></label>
 <div class="editor-field-heading"><label for="article-body">Article text</label><p>The article title above is Heading 1 (H1). Structure the article with H2 sections and H3 subsections.</p></div>
-<div class="editor-toolbar" role="group" aria-label="Insert article formatting"><button type="button" data-paragraph title="Insert a normal body paragraph"><span class="editor-format-mark">P</span><span>Paragraph</span></button><button type="button" data-prefix="## " title="Insert a Heading 2 for a major article section"><span class="editor-format-mark">H2</span><span>Section heading</span></button><button type="button" data-prefix="### " title="Insert a Heading 3 inside a section"><span class="editor-format-mark">H3</span><span>Subheading</span></button><button type="button" data-wrap="**"><span class="editor-format-mark">B</span><span>Bold</span></button><button type="button" data-prefix="- "><span class="editor-format-mark">•</span><span>Bullet list</span></button><button type="button" data-prefix="1. "><span class="editor-format-mark">1.</span><span>Numbered list</span></button><button type="button" data-link><span class="editor-format-mark">↗</span><span>Link</span></button></div>
+<div class="editor-toolbar" role="group" aria-label="Insert article formatting"><button type="button" data-paragraph title="Insert a normal body paragraph"><span class="editor-format-mark">P</span><span>Paragraph</span></button><button type="button" data-prefix="## " title="Insert a Heading 2 for a major article section"><span class="editor-format-mark">H2</span><span>Section heading</span></button><button type="button" data-prefix="### " title="Insert a Heading 3 inside a section"><span class="editor-format-mark">H3</span><span>Subheading</span></button><button type="button" data-wrap="**"><span class="editor-format-mark">B</span><span>Bold</span></button><button type="button" data-prefix="- "><span class="editor-format-mark">•</span><span>Bullet list</span></button><button type="button" data-prefix="1. "><span class="editor-format-mark">1.</span><span>Numbered list</span></button><button type="button" data-link><span class="editor-format-mark">↗</span><span>Link</span></button><button type="button" data-video title="Embed a YouTube or Vimeo video"><span class="editor-format-mark">▶</span><span>Video</span></button></div>
 <textarea id="article-body" name="body_text" rows="24" maxlength="50000" aria-describedby="format-help"><?= $e($values['body_text']) ?></textarea>
-<p id="format-help" class="editor-help">Select text and choose Paragraph, H2, H3, or another formatting button. Paragraph creates normal body text with the required spacing. HTML is displayed as text. Save before opening the preview.</p>
-<section class="editor-live-preview" aria-labelledby="live-preview-title">
-  <div class="editor-preview-label"><span>LIVE PREVIEW</span><small>Approximate public article appearance</small></div>
-  <article>
-    <span id="preview-category" class="editor-preview-category">Category</span>
-    <h1 id="live-preview-title">Your article title</h1>
-    <p id="preview-summary" class="editor-preview-summary">Your article summary will appear here.</p>
-    <p id="preview-byline" class="editor-preview-byline">CloudSys</p>
-    <div class="editor-preview-cover-wrap"<?= !empty($article['cover_image_path']) ? '' : ' hidden' ?>><img id="preview-cover" src="<?= !empty($article['cover_image_path']) ? '/article-media.php?id=' . (int) $id : '' ?>" alt=""></div>
-    <div id="preview-body" class="article-prose editor-preview-body"><p>Your formatted article text will appear here.</p></div>
-  </article>
-</section>
+<p id="format-help" class="editor-help">Select text and choose Paragraph, H2, H3, or another formatting button. Paragraph creates normal body text with the required spacing. HTML is displayed as text. Use Video for approved YouTube or Vimeo links.</p>
+<button type="button" class="editor-preview-open" id="preview-article-button">Preview article <span aria-hidden="true">↗</span></button>
 </div><aside class="editor-settings">
 <label>URL slug<input id="article-slug" name="slug" required maxlength="160" pattern="[a-z0-9]+(-[a-z0-9]+)*" <?= $id ? 'readonly' : '' ?> value="<?= $e($values['slug']) ?>"></label><p class="editor-help">/insights/your-slug — fixed after the first save.</p>
 <label>Category<select id="article-category" name="category_id" required><option value="">Choose a category</option><?php foreach ($categories as $category): ?><option value="<?= (int) $category['id'] ?>" <?= (string) $values['category_id'] === (string) $category['id'] ? 'selected' : '' ?>><?= $e($category['name']) ?></option><?php endforeach; ?></select></label>
@@ -76,4 +72,17 @@ $e = 'cloudsys_article_escape';
 <div class="editor-actions"><button class="admin-save" name="action" value="save">Save <?= ($article['status'] ?? '') === 'published' ? 'live changes' : 'draft' ?></button>
 <?php if (($article['status'] ?? '') === 'published'): ?><button name="action" value="unpublish" class="editor-secondary">Unpublish and save privately</button><?php else: ?><button name="action" value="publish" class="editor-publish" data-publish>Publish now</button><?php endif; ?>
 <?php if ($id): ?><a href="/admin/preview-article.php?id=<?= $id ?>" target="_blank" rel="noopener">Preview saved article ↗</a><?php endif; ?></div>
-</aside></form></main></body></html>
+</aside></form>
+<?php if ($id): ?><section class="editor-media-library" aria-labelledby="media-library-title"><div><p class="admin-eyebrow">ARTICLE MEDIA</p><h2 id="media-library-title">Images inside this article</h2><p>Every image is center-cropped to the same 1600 × 1000 size. Upload it, then copy the generated line into Article text where it should appear.</p></div><form method="post" enctype="multipart/form-data"><input type="hidden" name="csrf" value="<?= $e(cloudsys_csrf_token()) ?>"><input type="hidden" name="id" value="<?= (int) $id ?>"><label>Choose image<input type="file" name="inline_media" accept="image/jpeg,image/png" required></label><label>Image description<input name="inline_media_alt" maxlength="255" required placeholder="Describe what the image shows"></label><button class="admin-save" name="action" value="upload_media">Upload article image</button></form><?php if ($inlineMedia): ?><div class="editor-media-grid"><?php foreach ($inlineMedia as $media): $code = '![' . $media['alt_text'] . '](/article-inline-media.php?id=' . (int) $media['id'] . ')'; ?><article><img src="/article-inline-media.php?id=<?= (int) $media['id'] ?>" alt="<?= $e($media['alt_text']) ?>" width="1600" height="1000"><label>Insert code<input readonly value="<?= $e($code) ?>" aria-label="Image insert code"></label><button type="button" class="editor-copy-code" data-code="<?= $e($code) ?>">Copy code</button></article><?php endforeach; ?></div><?php endif; ?></section><?php endif; ?>
+<dialog class="editor-preview-dialog" id="article-preview-dialog" aria-labelledby="live-preview-title">
+  <div class="editor-preview-label"><span>ARTICLE PREVIEW</span><button type="button" id="close-article-preview" aria-label="Close article preview">×</button></div>
+  <div class="editor-preview-scroll"><article>
+    <span id="preview-category" class="editor-preview-category">Category</span>
+    <h1 id="live-preview-title">Your article title</h1>
+    <p id="preview-summary" class="editor-preview-summary">Your article summary will appear here.</p>
+    <p id="preview-byline" class="editor-preview-byline">CloudSys</p>
+    <div class="editor-preview-cover-wrap"<?= !empty($article['cover_image_path']) ? '' : ' hidden' ?>><img id="preview-cover" src="<?= !empty($article['cover_image_path']) ? '/article-media.php?id=' . (int) $id : '' ?>" alt=""></div>
+    <div id="preview-body" class="article-prose editor-preview-body"><p>Your formatted article text will appear here.</p></div>
+  </article></div>
+</dialog>
+</main></body></html>

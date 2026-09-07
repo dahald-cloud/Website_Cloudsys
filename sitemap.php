@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/includes/sitemap.php';
+require_once __DIR__ . '/includes/site-pages.php';
 header('Cache-Control: no-store');
 header('X-Content-Type-Options: nosniff');
 if (!in_array($_SERVER['REQUEST_METHOD'] ?? 'GET', ['GET', 'HEAD'], true)) {
@@ -11,13 +12,16 @@ try {
     if ($path === '/sitemap-pages.xml') {
         $xml = file_get_contents(__DIR__ . '/sitemap.xml');
         if ($xml === false) throw new RuntimeException('Static sitemap unavailable.');
+        $xml = cloudsys_filter_sitemap_pages($xml, cloudsys_page_visibility());
     } elseif ($path === '/sitemap.xml') {
-        $pages = (int) ceil(cloudsys_sitemap_article_count() / 1000);
+        $insightsVisible = cloudsys_page_is_visible('insights');
+        $pages = $insightsVisible ? (int) ceil(cloudsys_sitemap_article_count() / 1000) : 0;
         if ($pages > 49999) throw new RuntimeException('Sitemap index capacity exceeded.');
         $rows = [['loc' => 'https://cloudsysllc.com/sitemap-pages.xml']];
         for ($i = 1; $i <= $pages; $i++) $rows[] = ['loc' => 'https://cloudsysllc.com/sitemap-articles-' . $i . '.xml'];
         $xml = cloudsys_sitemap_xml($rows, true);
     } elseif (is_string($path) && preg_match('~\A/sitemap-articles-([1-9][0-9]{0,4})\.xml\z~D', $path, $match)) {
+        if (!cloudsys_page_is_visible('insights')) { http_response_code(404); exit('Sitemap not found.'); }
         $page = (int) $match[1];
         if ($page > (int) ceil(cloudsys_sitemap_article_count() / 1000)) { http_response_code(404); exit('Sitemap not found.'); }
         $rows = [];

@@ -68,3 +68,5 @@
 .insights-page .footer-links{display:flex;flex-wrap:wrap;gap:16px}
 @media(max-width:1000px){.insights-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:640px){.insights-main{width:88%;padding-top:36px}.insights-grid{grid-template-columns:1fr}.insights-search>div{flex-direction:column}.insights-search button{min-height:48px}.insights-intro h1 br{display:none}.insight-card-content{padding:22px}.insights-contact{font-size:.875rem;max-width:130px}.insights-page .brand img{width:125px}.insights-article-cta{padding:22px}.insights-prose{font-size:1rem}}
+.article-video{position:relative;width:100%;margin:36px 0;aspect-ratio:16/9;overflow:hidden;background:#050b10}.article-video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}.article-media-error{padding:14px;border-left:4px solid #b6473e;background:#fff0ee;color:#7d211b}
+.article-inline-image{margin:36px 0}.article-inline-image img{display:block;width:100%;height:auto;aspect-ratio:8/5;object-fit:cover}
