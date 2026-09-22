@@ -17,6 +17,7 @@ function cloudsys_admin_header(array $admin, string $active): void
       <nav class="admin-context-nav" aria-label="Administrator navigation">
         <a href="/admin/"<?= $active === 'controls' ? ' aria-current="page"' : '' ?>>Website controls</a>
         <a href="/admin/articles.php"<?= $active === 'articles' ? ' aria-current="page"' : '' ?>>Articles</a>
+        <a href="/admin/ai-writer.php"<?= $active === 'ai-writer' ? ' aria-current="page"' : '' ?>>AI writer</a>
         <a href="/admin/administrators.php"<?= $active === 'administrators' ? ' aria-current="page"' : '' ?>>Administrators</a>
       </nav>
       <details class="admin-profile">

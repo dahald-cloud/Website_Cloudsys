@@ -44,12 +44,12 @@ $e = 'cloudsys_article_escape';
 <title><?= $id ? 'Edit article' : 'New article' ?> | CloudSys</title><meta name="robots" content="noindex,nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css?v=20260907-1"><link rel="stylesheet" href="/admin-styles.css?v=20260907-1"><link rel="stylesheet" href="/article-admin.css?v=20260907-1"><script src="/article-editor.js?v=20260907-1" defer></script></head>
+<link rel="stylesheet" href="/style.css?v=20260922-1"><link rel="stylesheet" href="/admin-styles.css?v=20260922-1"><link rel="stylesheet" href="/article-admin.css?v=20260922-1"><script src="/article-editor.js?v=20260922-1" defer></script></head>
 <body class="admin-dashboard-shell"><?php cloudsys_admin_header($admin, 'articles'); ?>
 <main class="admin-dashboard article-workspace"><p class="admin-eyebrow">PUBLISHING</p><h1><?= $id ? 'Edit article' : 'New article' ?></h1>
 <p>Status: <strong><?= $e($article['status'] ?? 'draft') ?></strong>. Saving a published article updates the live page. Unpublish it first to work privately.</p>
 <?php if (!empty($article['published_at'])): ?><p>Publication date (UTC): <?= $e($article['published_at']) ?></p><?php endif; ?>
-<?php if ($errorMessage): ?><p class="admin-alert" role="alert"><?= $e($errorMessage) ?> If you selected an image, choose it again before retrying.</p><?php elseif (isset($_GET['saved'])): ?><p class="admin-success" role="status">Article saved.</p><?php elseif (isset($_GET['media'])): ?><p class="admin-success" role="status">Article image uploaded. Insert its code where the image should appear.</p><?php endif; ?>
+<?php if ($errorMessage): ?><p class="admin-alert" role="alert"><?= $e($errorMessage) ?> If you selected an image, choose it again before retrying.</p><?php elseif (isset($_GET['saved'])): ?><p class="admin-success" role="status">Article saved.</p><?php elseif (isset($_GET['media'])): ?><p class="admin-success" role="status">Article image uploaded. Insert its code where the image should appear.</p><?php elseif (isset($_GET['ai'])): ?><p class="admin-success" role="status">AI article imported. Review and edit it here before making further changes.</p><?php endif; ?>
 <form method="post" enctype="multipart/form-data" class="article-editor" id="article-editor">
 <input type="hidden" name="csrf" value="<?= $e(cloudsys_csrf_token()) ?>"><input type="hidden" name="id" value="<?= (int) $id ?>"><input type="hidden" name="revision" value="<?= $e($revision) ?>"><input type="hidden" name="MAX_FILE_SIZE" value="4194304">
 <div class="editor-main">

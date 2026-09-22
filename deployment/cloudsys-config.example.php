@@ -12,6 +12,9 @@ return [
     // OpenRouter stays server-side. Never place these values in browser JavaScript.
     'OPENROUTER_API_KEY' => 'your-openrouter-api-key',
     'OPENROUTER_MODEL' => 'openai/gpt-4o-mini',
+    'ARTICLE_AI_MODEL' => 'anthropic/claude-opus-4.8',
+    'ARTICLE_AI_FALLBACK_MODEL' => 'google/gemini-3.1-pro-preview',
+    'ARTICLE_AI_MAX_OUTPUT_TOKENS' => '6000',
     'OPENROUTER_BASE_URL' => 'https://openrouter.ai/api/v1',
     // MySQL credentials created in cPanel. Keep these outside public_html.
     'DB_HOST' => 'localhost',

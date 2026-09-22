@@ -44,10 +44,11 @@ function cloudsys_admin_article_counts(): array
     $statement = cloudsys_db()->query(
         "SELECT COUNT(*) AS total,
          COALESCE(SUM(status = 'draft'), 0) AS drafts,
-         COALESCE(SUM(status = 'published' AND published_at <= UTC_TIMESTAMP()), 0) AS published
+         COALESCE(SUM(status = 'published' AND published_at <= UTC_TIMESTAMP()), 0) AS published,
+         COALESCE(SUM(status = 'published' AND published_at > UTC_TIMESTAMP()), 0) AS scheduled
          FROM articles"
     );
-    return $statement->fetch() ?: ['total' => 0, 'drafts' => 0, 'published' => 0];
+    return $statement->fetch() ?: ['total' => 0, 'drafts' => 0, 'published' => 0, 'scheduled' => 0];
 }
 
 /** Validate public filter inputs before they reach a query or template. */
